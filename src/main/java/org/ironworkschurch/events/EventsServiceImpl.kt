@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.net.URL
+import java.util.zip.GZIPInputStream
 import javax.cache.annotation.CacheResult
 
 @Component
@@ -19,16 +20,21 @@ open class EventsServiceImpl : EventsService {
   @get:CacheResult
   override val rss: RssRoot get() {
     logger.debug("Fetching RSS")
-    return URL(eventsUrl)
-            .openStream()
-            .use {
-              serializer.read(RssRoot::class.java, it)
-            }
+    return serializer.read(RssRoot::class.java, contents)
   }
 
   @get:CacheResult
   override val contents: String get() {
     logger.debug("Fetching RSS")
-    return URL(eventsUrl).readText(Charsets.UTF_8)
+    val url = URL(eventsUrl)
+    val connection = url.openConnection()
+    connection.setRequestProperty("Accept-Encoding", "gzip");
+    val inputStream = if ("gzip" == connection.contentEncoding) {
+      GZIPInputStream(connection.getInputStream())
+    } else {
+      connection.getInputStream()
+    }
+
+    return inputStream.bufferedReader(Charsets.UTF_8).readText()
   }
 }
