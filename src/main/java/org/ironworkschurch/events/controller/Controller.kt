@@ -11,6 +11,9 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.View
 import org.thymeleaf.spring4.view.ThymeleafViewResolver
 import java.io.IOException
+import java.time.DayOfWeek
+import java.time.LocalDateTime
+import java.time.temporal.WeekFields
 import java.util.*
 import javax.servlet.http.HttpServletResponse
 import javax.xml.bind.JAXBException
@@ -27,7 +30,25 @@ class Controller {
   fun toHtml(): ModelAndView {
     val rss = eventsService.rss
 
-    return ModelAndView(view, ImmutableMap.of("rss", rss))
+    val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
+    val weekOfYear = weekFields.weekOfYear()
+
+    val now = LocalDateTime.now()
+    val thisWeek = now.plusDays(1)[weekOfYear]
+
+    var futureItems = rss.channel
+            .items
+            .filter { it.dateRange?.lowerEndpoint()?.isAfter(now) ?: false }
+
+    val thisWeekItems = futureItems
+            .filter { it.dateRange?.lowerEndpoint()?.get(weekOfYear) == thisWeek }
+
+    futureItems = futureItems.filter { it !in thisWeekItems }
+
+    val modelMap = mapOf("thisWeek" to thisWeekItems,
+            "upcoming" to futureItems)
+
+    return ModelAndView(view, modelMap)
   }
 
   @RequestMapping(value = "/rss", produces = arrayOf("text/xml"))

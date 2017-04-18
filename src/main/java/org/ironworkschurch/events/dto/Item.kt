@@ -1,8 +1,10 @@
 package org.ironworkschurch.events.dto
 
+import com.google.common.collect.Range
 import org.simpleframework.xml.Element
 import org.simpleframework.xml.ElementList
 import org.simpleframework.xml.Root
+import java.time.LocalDateTime
 
 @Root(strict = false)
 class Item {
@@ -42,4 +44,5 @@ class Item {
   var thumbnails: List<Thumbnail>? = null
    private set
 
+  var dateRange: Range<LocalDateTime>? = null
 }
