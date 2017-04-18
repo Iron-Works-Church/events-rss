@@ -1,0 +1,33 @@
+h2 {
+  font-size: 48px;
+  font-weight: bold;
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  text-align: center;
+}
+
+#logo {
+  text-align:center;
+}
+
+#logo img {
+  width: 150px;
+  height: 150px;
+}
+
+p * {
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  font-size: 14px;
+
+}
+
+.category {
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  font-size: 20px;
+  color: #696969;
+}
+
+p {
+  display: block;
+  margin-before: 1em;
+  margin-after: 1em;
+}

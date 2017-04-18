@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Iron Works Church events</title>
+    <link href="weekly.css" rel="stylesheet" />
 </head>
 <body>
+<div id="logo"><img src="iwc-logo.jpg" /></div>
+<h2>The Weekly</h2>
 <div th:each="channel : ${rss.channel}">
-    <h3 th:text="${channel.title}"></h3>
-    <div th:each="item : ${channel.items}">
-        <span th:text="${item.title}"></span>
-        <div th:utext="${item.encoded}"></div>
-    </div>
+    <b class="category">This Week</b>
+    <p th:each="item : ${channel.items}">
+        <b th:text="${item.title}"></b>
+        <span th:utext="${item.description}"></span>
+    </p>
 </div>
 </body>
 </html>
