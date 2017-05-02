@@ -1,16 +1,14 @@
 package org.ironworkschurch.events.controller
 
-import org.ironworkschurch.events.EventsService
+import org.ironworkschurch.events.service.EventsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.View
 import org.thymeleaf.spring4.view.ThymeleafViewResolver
 import java.io.IOException
-import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.time.temporal.WeekFields
 import java.util.*
 import javax.servlet.http.HttpServletResponse
 import javax.xml.bind.JAXBException

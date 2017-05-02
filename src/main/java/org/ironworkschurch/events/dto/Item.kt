@@ -30,6 +30,9 @@ class Item {
     this.dateRange = dateRange
   }
 
+  @Suppress("unused")
+  private constructor()
+
   @field:Element
   lateinit var guid: String
     private set

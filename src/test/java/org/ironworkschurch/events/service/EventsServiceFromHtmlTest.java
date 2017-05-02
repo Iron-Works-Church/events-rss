@@ -1,10 +1,9 @@
-package org.ironworkschurch.events;
-
-import com.google.common.collect.Range;
-import org.ironworkschurch.events.EventsServiceFromHtml;
-import org.junit.Test;
+package org.ironworkschurch.events.service;
 
 import java.time.LocalDateTime;
+
+import com.google.common.collect.Range;
+import org.junit.Test;
 
 public class EventsServiceFromHtmlTest {
   @Test

@@ -1,4 +1,4 @@
-package org.ironworkschurch.events
+package org.ironworkschurch.events.service
 
 import org.ironworkschurch.events.dto.Item
 import javax.cache.annotation.CacheResult
