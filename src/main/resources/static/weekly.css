@@ -27,6 +27,8 @@ p * {
 }
 
 p {
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  font-size: 14px;
   display: block;
   margin-before: 1em;
   margin-after: 1em;

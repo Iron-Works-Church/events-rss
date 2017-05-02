@@ -15,8 +15,15 @@ import java.net.URL
 import java.time.LocalDateTime
 import java.util.zip.GZIPInputStream
 import javax.cache.annotation.CacheResult
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
-open class EventsServiceImpl : EventsService {
+
+@Component
+open class EventsServiceFromHtml : EventsService {
   @Value("\${events-url}")
   protected lateinit var eventsUrl: String
   @Value("\${hidden-events-url}")
@@ -26,11 +33,15 @@ open class EventsServiceImpl : EventsService {
 
   @get:CacheResult
   override val rss: List<Item> get() {
-    logger.debug("Fetching RSS")
-    return listOf(publicEvents, hiddenEvents)
-            .flatMap { serializer.read(RssRoot::class.java, it).channel.items }
-            .onEach { item -> item.populateDateRange() }
-    // TODO add sermon link
+    logger.debug("Fetching HTML")
+    return listOf(eventsUrl, hiddenEventsUrl) .flatMap { getItemsOnPage(it) }
+  }
+
+  private fun getItemsOnPage(it: String): List<Item> {
+    val document = Jsoup.connect(it).get()
+    val upcomingEvents = document.getElementsByClass("eventlist--upcoming").first()
+    val articles = upcomingEvents.getElementsByTag("article")
+    return articles.map { it.toItem() }
   }
 
   @get:CacheResult
@@ -43,10 +54,10 @@ open class EventsServiceImpl : EventsService {
     return getContents("hidden events", hiddenEventsUrl)
   }
 
-  private fun getContents(name: String, rssUrl: String): String {
+  private fun getContents(name: String, htmlUrl: String): String {
     logger.debug("Fetching $name RSS")
     Thread.sleep(500)
-    val url = URL("$rssUrl?format=rss")
+    val url = URL(htmlUrl)
     val connection = url.openConnection()
     connection.setRequestProperty("Accept-Encoding", "gzip")
     val inputStream = if ("gzip" == connection.contentEncoding) {
@@ -58,36 +69,49 @@ open class EventsServiceImpl : EventsService {
     return inputStream.bufferedReader(Charsets.UTF_8).readText()
   }
 
-  private fun Item.populateDateRange() {
-    logger.debug("Populating date range for $guid")
-    Thread.sleep(500)
-    val connection = URL(link + "?format=ical").openConnection()
-
-    connection.setRequestProperty("Accept-Encoding", "gzip")
-    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36");
-
-    val inputStream = try {
-      if ("gzip" == connection.contentEncoding) {
-        GZIPInputStream(connection.getInputStream())
-      } else {
-        connection.getInputStream()
-      }
-    } catch (e: IOException) {
-      logger.debug(connection.headerFields.toString())
-      throw e
-    }
-
-    val icalStr = inputStream.bufferedReader(Charsets.UTF_8).readText()
-    val ical = Biweekly.parse(icalStr).first();
-    val event = ical.events.first()
-
-    dateRange = Range.closedOpen(event.dateStart.toLocalDateTime(), event.dateEnd.toLocalDateTime())
-  }
-
   private fun DateOrDateTimeProperty.toLocalDateTime(): LocalDateTime? {
     val rawComponents = value.rawComponents
     return LocalDateTime.of(rawComponents.year, rawComponents.month, rawComponents.date, rawComponents.hour, rawComponents.minute, rawComponents.second)
   }
+
+  private fun Article.toItem(): Item {
+    val icalUrl = getElementsByClass("eventlist-meta-export-google").first().attr("href")
+    val dateRange = getDateRange(icalUrl)
+
+    val link = getElementsByClass("eventlist-title-link").first().attr("href")
+    return Item(
+            guid = link,
+            title = getElementsByClass("eventlist-title-link").first().text(),
+            link = link,
+            description = getElementsByClass("eventlist-excerpt").first().html(),
+            pubDate = "",
+            dateRange = dateRange
+    )
+  }
+
+  val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+  val regex = "&dates=(.+Z)/(.+Z)".toRegex()
+
+  fun getDateRange(icalUrl: String): Range<LocalDateTime>? {
+    val matchResult = regex.find(icalUrl)
+    val dates = (matchResult
+            ?.groups ?: listOf<MatchGroup?>())
+            .drop(1)
+            .filterNotNull()
+            .map { it.value }
+            .map { LocalDateTime.parse(it, dateTimeFormatter) }
+    val dateRange = if (dates.size == 2) {
+      Range.closedOpen(dates[0], dates[1])
+    } else {
+      null
+    }
+    return dateRange
+  }
 }
+
+typealias Article = Element
+
+
+
 
 

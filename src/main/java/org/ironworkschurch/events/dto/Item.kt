@@ -8,6 +8,28 @@ import java.time.LocalDateTime
 
 @Root(strict = false)
 class Item {
+  constructor(guid: String,
+              title: String,
+              link: String,
+              description: String,
+              pubDate: String,
+              creator: String? = null,
+              enclosure: Enclosure? = null,
+              encoded: String? = null,
+              thumbnails: List<Thumbnail>? = null,
+              dateRange: Range<LocalDateTime>? = null) {
+    this.guid = guid
+    this.title = title
+    this.link = link
+    this.description = description
+    this.pubDate = pubDate
+    this.creator = creator
+    this.enclosure = enclosure
+    this.encoded = encoded
+    this.thumbnails = thumbnails
+    this.dateRange = dateRange
+  }
+
   @field:Element
   lateinit var guid: String
     private set

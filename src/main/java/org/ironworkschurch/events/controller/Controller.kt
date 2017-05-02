@@ -1,11 +1,7 @@
 package org.ironworkschurch.events.controller
 
-import com.google.common.collect.ImmutableMap
-import org.ironworkschurch.events.EventsServiceImpl
 import org.ironworkschurch.events.EventsService
-import org.simpleframework.xml.core.Persister
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.servlet.View
@@ -13,6 +9,7 @@ import org.thymeleaf.spring4.view.ThymeleafViewResolver
 import java.io.IOException
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
 import java.util.*
 import javax.servlet.http.HttpServletResponse
@@ -28,25 +25,31 @@ class Controller {
   @RequestMapping(value = "/", produces = arrayOf("text/html"))
   @Throws(IOException::class, JAXBException::class)
   fun toHtml(): ModelAndView {
-    val rss = eventsService.rss
-
-    val weekFields = WeekFields.of(DayOfWeek.SUNDAY, 7)
-    val weekOfYear = weekFields.weekOfYear()
+    val items = eventsService.rss
 
     val now = LocalDateTime.now()
-    val thisWeek = now.plusDays(1)[weekOfYear]
+    val nextSunday = now.plusWeeks(1).plusDays(1)
+    val nextMonth = now.plus(1, ChronoUnit.MONTHS).plusDays(1)
 
-    var futureItems = rss.channel
-            .items
-            .filter { it.dateRange?.lowerEndpoint()?.isAfter(now) ?: false }
+    var futureItems = items
+            .filter { it.dateRange?.upperEndpoint()?.isAfter(now) ?: false }
 
     val thisWeekItems = futureItems
-            .filter { it.dateRange?.lowerEndpoint()?.get(weekOfYear) == thisWeek }
+            .filter { it.dateRange?.lowerEndpoint()?.isAfter(now) ?: false }
+            .filter { it.dateRange?.lowerEndpoint()?.isBefore(nextSunday) ?: false }
 
-    futureItems = futureItems.filter { it !in thisWeekItems }
+    val ongoingItems = futureItems
+            .filter { it.dateRange?.lowerEndpoint()?.isBefore(now) ?: false }
+            .filter { it.dateRange?.upperEndpoint()?.isAfter(nextSunday) ?: false }
+
+    futureItems = futureItems
+            .filter { it !in thisWeekItems }
+            .filter { it !in ongoingItems }
+            .filter { it.dateRange?.upperEndpoint()?.isBefore(nextMonth) ?: false}
 
     val modelMap = mapOf("thisWeek" to thisWeekItems,
-            "upcoming" to futureItems)
+            "upcoming" to futureItems,
+            "ongoing" to ongoingItems)
 
     return ModelAndView(view, modelMap)
   }
@@ -54,7 +57,7 @@ class Controller {
   @RequestMapping(value = "/rss", produces = arrayOf("text/xml"))
   fun streamRss(response: HttpServletResponse) {
     response.contentType = "application/xml"
-    eventsService.contents
+    eventsService.publicEvents
             .byteInputStream()
             .use { inputStream ->
               response.outputStream.use {

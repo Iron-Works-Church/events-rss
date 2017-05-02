@@ -23,5 +23,13 @@
         <span th:utext="${item.description}"></span>
     </p>
 </div>
+<p></p>
+<div>
+    <p><b class="category">Ongoing</b></p>
+    <p th:each="item : ${ongoing}">
+        <b th:text="${item.title}"></b>
+        <span th:utext="${item.description}"></span>
+    </p>
+</div>
 </body>
 </html>
