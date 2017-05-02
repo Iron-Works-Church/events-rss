@@ -1,0 +1,19 @@
+logging:
+    level:
+        org:
+            ironworkschurch:
+                events: DEBUG
+management:
+    security:
+        enabled: false
+org:
+    ironworkschurch:
+        events-url: https://ironworkschurch.org/new-events/
+        hidden-events-url: https://ironworkschurch.org/hidden-1/
+server:
+    compression:
+        enabled: true
+        mime-types: application/json,application/xml,text/html,text/xml,text/plain
+spring:
+    thymeleaf:
+        cache: false
