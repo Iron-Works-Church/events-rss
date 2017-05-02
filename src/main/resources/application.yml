@@ -6,8 +6,7 @@ logging:
 management:
     security:
         enabled: false
-org:
-    ironworkschurch:
+org.ironworkschurch:
         events-url: https://ironworkschurch.org/new-events/
         hidden-events-url: https://ironworkschurch.org/hidden-1/
 server:
