@@ -1,36 +1,42 @@
 package org.ironworkschurch.events.service
 
+import com.google.common.collect.Range
+import org.ironworkschurch.events.dto.Item
+import org.jsoup.Jsoup
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.zip.GZIPInputStream
+import javax.cache.annotation.CacheResult
 
 @Component
-open class EventsServiceFromHtml : EventsService {
-  @org.springframework.beans.factory.annotation.Value("\${events-url}")
-  protected lateinit var eventsUrl: String
-  @org.springframework.beans.factory.annotation.Value("\${hidden-events-url}")
-  protected lateinit var hiddenEventsUrl: String
-  protected val serializer: org.simpleframework.xml.core.Persister by lazy { org.simpleframework.xml.core.Persister() }
-  private val logger = org.slf4j.LoggerFactory.getLogger(org.ironworkschurch.events.config.CacheConfig::class.java)
+open class EventsServiceFromHtml @Autowired constructor(
+  @Value("\${org.ironworkschurch.events-url}") val eventsUrl: String,
+  @Value("\${org.ironworkschurch.hidden-events-url}") val hiddenEventsUrl: String) : EventsService {
+  private val logger = LoggerFactory.getLogger(EventsServiceFromHtml::class.java)
 
-  @get:javax.cache.annotation.CacheResult
-  override val rss: List<org.ironworkschurch.events.dto.Item> get() {
+  @get:CacheResult
+  override val rss: List<Item> get() {
     logger.debug("Fetching HTML")
     return listOf(eventsUrl, hiddenEventsUrl) .flatMap { getItemsOnPage(it) }
   }
 
-  private fun getItemsOnPage(it: String): List<org.ironworkschurch.events.dto.Item> {
-    val document = org.jsoup.Jsoup.connect(it).get()
+  private fun getItemsOnPage(it: String): List<Item> {
+    val document = Jsoup.connect(it).get()
     val upcomingEvents = document.getElementsByClass("eventlist--upcoming").first()
     val articles = upcomingEvents.getElementsByTag("article")
     return articles.map { it.toItem() }
   }
 
-  @get:javax.cache.annotation.CacheResult
+  @get:CacheResult
   override val publicEvents: String get() {
     return getContents("public events", eventsUrl)
   }
 
-  @get:javax.cache.annotation.CacheResult
+  @get:CacheResult
   override val hiddenEvents: String get() {
     return getContents("hidden events", hiddenEventsUrl)
   }
@@ -42,7 +48,7 @@ open class EventsServiceFromHtml : EventsService {
     val connection = url.openConnection()
     connection.setRequestProperty("Accept-Encoding", "gzip")
     val inputStream = if ("gzip" == connection.contentEncoding) {
-      java.util.zip.GZIPInputStream(connection.getInputStream())
+      GZIPInputStream(connection.getInputStream())
     } else {
       connection.getInputStream()
     }
@@ -50,17 +56,12 @@ open class EventsServiceFromHtml : EventsService {
     return inputStream.bufferedReader(Charsets.UTF_8).readText()
   }
 
-  private fun biweekly.property.DateOrDateTimeProperty.toLocalDateTime(): java.time.LocalDateTime? {
-    val rawComponents = value.rawComponents
-    return java.time.LocalDateTime.of(rawComponents.year, rawComponents.month, rawComponents.date, rawComponents.hour, rawComponents.minute, rawComponents.second)
-  }
-
-  private fun org.ironworkschurch.events.service.Article.toItem(): org.ironworkschurch.events.dto.Item {
+  private fun org.ironworkschurch.events.service.Article.toItem(): Item {
     val icalUrl = getElementsByClass("eventlist-meta-export-google").first().attr("href")
     val dateRange = getDateRange(icalUrl)
 
     val link = getElementsByClass("eventlist-title-link").first().attr("href")
-    return org.ironworkschurch.events.dto.Item(
+    return Item(
       guid = link,
       title = getElementsByClass("eventlist-title-link").first().text(),
       link = link,
@@ -70,10 +71,10 @@ open class EventsServiceFromHtml : EventsService {
     )
   }
 
-  val dateTimeFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+  val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
   val regex = "&dates=(.+Z)/(.+Z)".toRegex()
 
-  fun getDateRange(icalUrl: String): com.google.common.collect.Range<LocalDateTime>? {
+  fun getDateRange(icalUrl: String): Range<LocalDateTime>? {
     val matchResult = regex.find(icalUrl)
     val dates = (matchResult
             ?.groups ?: listOf<MatchGroup?>())
@@ -82,7 +83,7 @@ open class EventsServiceFromHtml : EventsService {
             .map { it.value }
             .map { java.time.LocalDateTime.parse(it, dateTimeFormatter) }
     val dateRange = if (dates.size == 2) {
-      com.google.common.collect.Range.closedOpen(dates[0], dates[1])
+      Range.closedOpen(dates[0], dates[1])
     } else {
       null
     }
