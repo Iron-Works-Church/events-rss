@@ -6,14 +6,12 @@ import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Component
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPInputStream
 import javax.cache.annotation.CacheResult
 
-@Component
 open class EventsServiceFromHtml @Autowired constructor(
   @Value("\${org.ironworkschurch.events-url}") val eventsUrl: String,
   @Value("\${org.ironworkschurch.hidden-events-url}") val hiddenEventsUrl: String) : EventsService {
