@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.zip.GZIPInputStream
@@ -44,7 +45,7 @@ open class EventsServiceFromHtml @Autowired constructor(
   private fun getContents(name: String, htmlUrl: String): String {
     logger.debug("Fetching $name RSS")
     Thread.sleep(500)
-    val url = java.net.URL(htmlUrl)
+    val url = URL(htmlUrl)
     val connection = url.openConnection()
     connection.setRequestProperty("Accept-Encoding", "gzip")
     val inputStream = if ("gzip" == connection.contentEncoding) {
@@ -56,7 +57,7 @@ open class EventsServiceFromHtml @Autowired constructor(
     return inputStream.bufferedReader(Charsets.UTF_8).readText()
   }
 
-  private fun org.ironworkschurch.events.service.Article.toItem(): Item {
+  private fun Article.toItem(): Item {
     val icalUrl = getElementsByClass("eventlist-meta-export-google").first().attr("href")
     val dateRange = getDateRange(icalUrl)
 
@@ -71,23 +72,21 @@ open class EventsServiceFromHtml @Autowired constructor(
     )
   }
 
-  val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
   val regex = "&dates=(.+Z)/(.+Z)".toRegex()
 
   fun getDateRange(icalUrl: String): Range<LocalDateTime>? {
-    val matchResult = regex.find(icalUrl)
-    val dates = (matchResult
-            ?.groups ?: listOf<MatchGroup?>())
+    val dates = (regex.find(icalUrl)?.groups ?: listOf<MatchGroup?>())
             .drop(1)
             .filterNotNull()
             .map { it.value }
-            .map { java.time.LocalDateTime.parse(it, dateTimeFormatter) }
-    val dateRange = if (dates.size == 2) {
-      Range.closedOpen(dates[0], dates[1])
+            .map { LocalDateTime.parse(it, dateTimeFormatter) }
+    return if (dates.size == 2) {
+      val (startDate, endDate) = dates
+      Range.closedOpen(startDate, endDate)
     } else {
       null
     }
-    return dateRange
   }
 }
 

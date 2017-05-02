@@ -42,7 +42,7 @@ open class EventsServiceImpl @Autowired constructor(
   private fun getContents(name: String, rssUrl: String): String {
     logger.debug("Fetching $name RSS")
     Thread.sleep(500)
-    val url = java.net.URL("$rssUrl?format=rss")
+    val url = URL("$rssUrl?format=rss")
     val connection = url.openConnection()
     connection.setRequestProperty("Accept-Encoding", "gzip")
     val inputStream = if ("gzip" == connection.contentEncoding) {
@@ -60,7 +60,7 @@ open class EventsServiceImpl @Autowired constructor(
     val connection = URL(link + "?format=ical").openConnection()
 
     connection.setRequestProperty("Accept-Encoding", "gzip")
-    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36");
+    connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
 
     val inputStream = try {
       if ("gzip" == connection.contentEncoding) {
