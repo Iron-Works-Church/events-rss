@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import org.ironworkschurch.events.service.EventsService;
-import org.ironworkschurch.events.service.EventsServiceFromJson;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +16,6 @@ public class ServiceConfig
     ObjectMapper objectMapper = new ObjectMapper()
       .registerModule(new KotlinModule())
       .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    return new EventsServiceFromJson(newEventsUrl, hiddenEventsUrl, objectMapper);
+    return new EventsService(newEventsUrl, hiddenEventsUrl, objectMapper);
   }
 }
