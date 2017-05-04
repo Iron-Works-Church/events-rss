@@ -1,6 +1,8 @@
 package org.ironworkschurch.events.dto.json
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.google.common.collect.Range
+import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Events(
@@ -27,7 +29,13 @@ data class Event(
   val fullUrl: String,
   val startDate: Long,
   val endDate: Long
-)
+) {
+
+  private fun EpochSeconds.localDateTime() = java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(this), java.time.ZoneId.systemDefault())
+  val dateRange: Range<LocalDateTime> get() = Range.closedOpen(startDate.localDateTime(), endDate.localDateTime())
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Author(val displayName: String)
+
+typealias EpochSeconds = Long

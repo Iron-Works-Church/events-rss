@@ -12,7 +12,7 @@
     <p><b class="category">This Week</b></p>
     <p th:each="item : ${thisWeek}">
         <b th:text="${item.title}"></b>
-        <span th:utext="${item.description}"></span>
+        <span th:utext="${item.excerpt}"></span>
     </p>
 </div>
 <p></p>
@@ -20,7 +20,7 @@
     <p><b class="category">Upcoming</b></p>
     <p th:each="item : ${upcoming}">
         <b th:text="${item.title}"></b>
-        <span th:utext="${item.description}"></span>
+        <span th:utext="${item.excerpt}"></span>
     </p>
 </div>
 <p></p>
@@ -28,7 +28,7 @@
     <p><b class="category">Ongoing</b></p>
     <p th:each="item : ${ongoing}">
         <b th:text="${item.title}"></b>
-        <span th:utext="${item.description}"></span>
+        <span th:utext="${item.excerpt}"></span>
     </p>
 </div>
 </body>

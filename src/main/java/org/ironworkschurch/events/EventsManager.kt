@@ -1,14 +1,12 @@
 package org.ironworkschurch.events
 
-import org.ironworkschurch.events.dto.Item
+import org.ironworkschurch.events.dto.json.Event
 import org.ironworkschurch.events.service.EventsService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
+import javax.inject.Inject
 
-@Component
-open class EventsManager @Autowired constructor(val eventsService: EventsService) {
+open class EventsManager @Inject constructor(val eventsService: EventsService) {
   fun getWeeklyItems(): WeeklyItems {
     val items = eventsService.rss
 
@@ -17,20 +15,20 @@ open class EventsManager @Autowired constructor(val eventsService: EventsService
     val nextMonth = now.plus(1, ChronoUnit.MONTHS).plusDays(1)
 
     var futureItems = items
-      .filter { it.dateRange?.upperEndpoint()?.isAfter(now) ?: false }
+      .filter { it.dateRange.upperEndpoint()?.isAfter(now) ?: false }
 
     val thisWeekItems = futureItems
-      .filter { it.dateRange?.lowerEndpoint()?.isAfter(now) ?: false }
-      .filter { it.dateRange?.lowerEndpoint()?.isBefore(nextSunday) ?: false }
+      .filter { it.dateRange.lowerEndpoint()?.isAfter(now) ?: false }
+      .filter { it.dateRange.lowerEndpoint()?.isBefore(nextSunday) ?: false }
 
     val ongoingItems = futureItems
-      .filter { it.dateRange?.lowerEndpoint()?.isBefore(now) ?: false }
-      .filter { it.dateRange?.upperEndpoint()?.isAfter(nextSunday) ?: false }
+      .filter { it.dateRange.lowerEndpoint()?.isBefore(now) ?: false }
+      .filter { it.dateRange.upperEndpoint()?.isAfter(nextSunday) ?: false }
 
     futureItems = futureItems
       .filter { it !in thisWeekItems }
       .filter { it !in ongoingItems }
-      .filter { it.dateRange?.upperEndpoint()?.isBefore(nextMonth) ?: false}
+      .filter { it.dateRange.upperEndpoint()?.isBefore(nextMonth) ?: false}
 
     val value = WeeklyItems (
       thisWeekItems = thisWeekItems,
@@ -41,5 +39,5 @@ open class EventsManager @Autowired constructor(val eventsService: EventsService
     return value
   }
 
-  data class WeeklyItems(val thisWeekItems: List<Item>, val futureItems: List<Item>, val ongoingItems: List<Item>)
+  data class WeeklyItems(val thisWeekItems: List<Event>, val futureItems: List<Event>, val ongoingItems: List<Event>)
 }

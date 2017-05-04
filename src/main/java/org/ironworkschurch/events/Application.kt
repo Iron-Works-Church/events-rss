@@ -1,20 +1,22 @@
 package org.ironworkschurch.events
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.ApplicationArguments
-import org.springframework.boot.ApplicationRunner
-import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
+import com.google.inject.AbstractModule
+import com.google.inject.Guice
+import org.ironworkschurch.events.config.ServiceConfig
+import org.ironworkschurch.events.dto.json.Event
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
-import org.thymeleaf.spring4.SpringTemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
+import javax.inject.Inject
 
-@SpringBootApplication
-open class Application @Autowired constructor(val eventsManager: EventsManager) : ApplicationRunner {
-  override fun run(args: ApplicationArguments?) {
-    val templateEngine = springTemplateEngine()
+open class Application @Inject constructor(val eventsManager: EventsManager) {
+  fun run() {
+    val templateEngine = templateEngine()
 
-    val (thisWeekItems, futureItems, ongoingItems) = eventsManager.getWeeklyItems()
+    log.debug("retrieving events")
+    val (thisWeekItems, futureItems, ongoingItems) = Triple(listOf<List<Event>>(), listOf<List<Event>>(), listOf<List<Event>>())//eventsManager.getWeeklyItems()
 
     val context = Context().apply {
       setVariable("thisWeek", thisWeekItems)
@@ -22,19 +24,28 @@ open class Application @Autowired constructor(val eventsManager: EventsManager) 
       setVariable("ongoing", ongoingItems)
     }
 
+    log.debug("processing html template")
     val output = templateEngine.process("view", context)
+
+    log.debug("complete")
     println(output)
   }
 
   companion object {
+    val log = LoggerFactory.getLogger(Application::class.java)
     @JvmStatic
     fun main(args: Array<String>) {
-      SpringApplication.run(Application::class.java, *args)
+      log.debug("beginning email generation")
+
+      log.debug("acquiring dependency injector")
+      val injector = Guice.createInjector(ServiceConfig())
+
+      injector.getInstance(Application::class.java).run()
     }
   }
 
-  private fun springTemplateEngine() = SpringTemplateEngine().apply {
-    addTemplateResolver(ClassLoaderTemplateResolver().apply {
+  private fun templateEngine() = TemplateEngine().apply {
+    setTemplateResolver(ClassLoaderTemplateResolver().apply {
       prefix = "templates/"
       suffix = ".html"
     })
