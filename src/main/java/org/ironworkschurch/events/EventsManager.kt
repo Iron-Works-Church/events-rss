@@ -1,6 +1,7 @@
 package org.ironworkschurch.events
 
 import org.ironworkschurch.events.dto.json.Event
+import org.ironworkschurch.events.dto.json.SermonItem
 import org.ironworkschurch.events.service.EventsService
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -9,6 +10,9 @@ import javax.inject.Inject
 open class EventsManager @Inject constructor(val eventsService: EventsService) {
   fun getWeeklyItems(): WeeklyItems {
     val items = eventsService.rss
+    val lastSermon = eventsService.sermons
+            .sortedByDescending { it.addedOn }
+            .firstOrNull()
 
     val now = LocalDateTime.now()
     val nextSunday = now.plusWeeks(1).plusDays(1)
@@ -30,14 +34,13 @@ open class EventsManager @Inject constructor(val eventsService: EventsService) {
       .filter { it !in ongoingItems }
       .filter { it.dateRange.upperEndpoint()?.isBefore(nextMonth) ?: false}
 
-    val value = WeeklyItems (
+    return WeeklyItems (
       thisWeekItems = thisWeekItems,
       futureItems = futureItems,
-      ongoingItems = ongoingItems
+      ongoingItems = ongoingItems,
+      lastSermon = lastSermon
     )
-
-    return value
   }
 
-  data class WeeklyItems(val thisWeekItems: List<Event>, val futureItems: List<Event>, val ongoingItems: List<Event>)
+  data class WeeklyItems(val thisWeekItems: List<Event>, val futureItems: List<Event>, val ongoingItems: List<Event>, val lastSermon: SermonItem?)
 }

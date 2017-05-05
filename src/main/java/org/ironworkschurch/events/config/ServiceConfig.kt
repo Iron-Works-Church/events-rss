@@ -7,6 +7,8 @@ import com.google.common.io.Resources
 import dagger.Module
 import dagger.Provides
 import org.ironworkschurch.events.service.EventsService
+import org.thymeleaf.TemplateEngine
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 import javax.inject.Named
 import javax.inject.Singleton
@@ -43,22 +45,24 @@ class ServiceConfig {
 
   @Provides
   @Named("org.ironworkschurch.events-url")
-  internal fun provideEventsUrl(): String {
-    return properties.getProperty("org.ironworkschurch.events-url")
-  }
+  internal fun provideEventsUrl() = properties.getProperty("org.ironworkschurch.events-url")
 
   @Provides
   @Named("org.ironworkschurch.hidden-events-url")
-  internal fun provideHiddenEventsUrl(): String {
-    return properties.getProperty("org.ironworkschurch.hidden-events-url")
-  }
+  internal fun provideHiddenEventsUrl() = properties.getProperty("org.ironworkschurch.hidden-events-url")
+
+  @Provides
+  @Named("org.ironworkschurch.sermons-url")
+  internal fun provideSermonsUrl() = properties.getProperty("org.ironworkschurch.sermons-url")
+
 
   @Provides
   @Singleton
   internal fun provideEventsService(@Named("org.ironworkschurch.events-url") newEventsUrl: String,
                                     @Named("org.ironworkschurch.hidden-events-url") hiddenEventsUrl: String,
+                                    @Named("org.ironworkschurch.sermons-url") sermonsUrl: String,
                                     objectMapper: ObjectMapper): EventsService {
-    return EventsService(newEventsUrl, hiddenEventsUrl, objectMapper)
+    return EventsService(newEventsUrl, hiddenEventsUrl, sermonsUrl, objectMapper)
   }
 
 
@@ -70,5 +74,15 @@ class ServiceConfig {
               .registerModule(KotlinModule())
               .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       return objectMapper
+    }
+
+  val templateEngine: TemplateEngine
+    @Provides
+    @Singleton
+    get() = TemplateEngine().apply {
+      setTemplateResolver(ClassLoaderTemplateResolver().apply {
+        prefix = "templates/"
+        suffix = ".html"
+      })
     }
 }

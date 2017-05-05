@@ -30,6 +30,10 @@
         <b th:text="${item.title}"></b>
         <span th:utext="${item.excerpt}"></span>
     </p>
+    <p>
+        <b>Last Week's Sermon</b>
+        <a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a> | <span th:text="${lastSermon.authorName}"></span>
+    </p>
 </div>
 </body>
 </html>

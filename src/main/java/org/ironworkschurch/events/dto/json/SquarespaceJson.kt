@@ -39,3 +39,16 @@ data class Event(
 data class Author(val displayName: String)
 
 typealias EpochSeconds = Long
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Sermons (val items: List<SermonItem>)
+
+val authorRegex = """data-author="([^"]+)"""".toRegex()
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class SermonItem (val title: String, val fullUrl: String, val body: String, val addedOn: Long) {
+  val authorName: String? get() = getData(authorRegex)
+  val url: String? get() = "https://ironworkschurch.org$fullUrl"
+
+  private fun getData(regex: Regex) = regex.find(body)?.groupValues?.get(1)
+}
