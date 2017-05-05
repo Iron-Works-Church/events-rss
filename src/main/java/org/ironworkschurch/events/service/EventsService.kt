@@ -26,7 +26,6 @@ class EventsService constructor(
 
   private fun getContents(name: String, pageUrl: String): String {
     logger.debug("Fetching $name RSS")
-    Thread.sleep(500)
     val url = URL("$pageUrl?format=json")
     val connection = url.openConnection()
     connection.setRequestProperty("Accept-Encoding", "gzip")

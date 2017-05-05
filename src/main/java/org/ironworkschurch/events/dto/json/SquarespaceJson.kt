@@ -32,7 +32,7 @@ data class Event(
 ) {
 
   private fun EpochSeconds.localDateTime() = java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(this), java.time.ZoneId.systemDefault())
-  val dateRange: Range<LocalDateTime> get() = Range.closedOpen(startDate.localDateTime(), endDate.localDateTime())
+  val dateRange: Range<LocalDateTime> by lazy { Range.closedOpen(startDate.localDateTime(), endDate.localDateTime()) }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

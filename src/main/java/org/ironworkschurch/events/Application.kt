@@ -1,7 +1,6 @@
 package org.ironworkschurch.events
 
-import com.google.inject.AbstractModule
-import com.google.inject.Guice
+import org.ironworkschurch.events.config.DaggerServiceComponent
 import org.ironworkschurch.events.config.ServiceConfig
 import org.ironworkschurch.events.dto.json.Event
 import org.slf4j.Logger
@@ -16,7 +15,8 @@ open class Application @Inject constructor(val eventsManager: EventsManager) {
     val templateEngine = templateEngine()
 
     log.debug("retrieving events")
-    val (thisWeekItems, futureItems, ongoingItems) = Triple(listOf<List<Event>>(), listOf<List<Event>>(), listOf<List<Event>>())//eventsManager.getWeeklyItems()
+    val fakeWeekly = Triple(listOf<List<Event>>(), listOf<List<Event>>(), listOf<List<Event>>())
+    val (thisWeekItems, futureItems, ongoingItems) = eventsManager.getWeeklyItems()
 
     val context = Context().apply {
       setVariable("thisWeek", thisWeekItems)
@@ -32,15 +32,16 @@ open class Application @Inject constructor(val eventsManager: EventsManager) {
   }
 
   companion object {
-    val log = LoggerFactory.getLogger(Application::class.java)
+    val log: Logger = LoggerFactory.getLogger(Application::class.java)
+
     @JvmStatic
     fun main(args: Array<String>) {
       log.debug("beginning email generation")
 
-      log.debug("acquiring dependency injector")
-      val injector = Guice.createInjector(ServiceConfig())
+      log.debug("injecting dependencies")
+      val application = DaggerServiceComponent.create().application
 
-      injector.getInstance(Application::class.java).run()
+      application.run()
     }
   }
 
