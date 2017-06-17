@@ -53,5 +53,6 @@ data class Sermon(
   val updatedOn: Long,
   val recordType: Int,
   val fullUrl: String?,
+  val excerpt: String?,
   val tags: List<String> = listOf()
 )

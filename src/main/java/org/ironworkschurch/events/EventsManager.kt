@@ -1,11 +1,11 @@
 package org.ironworkschurch.events
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.common.collect.Range
 import org.ironworkschurch.events.dto.DisplaySermon
 import org.ironworkschurch.events.dto.WeeklyItems
 import org.ironworkschurch.events.dto.json.Event
 import org.ironworkschurch.events.dto.json.Events
-import org.ironworkschurch.events.dto.json.Sermon
 import org.ironworkschurch.events.dto.json.Sermons
 import org.ironworkschurch.events.service.EventsService
 import java.time.LocalDateTime
@@ -20,21 +20,18 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
     val events = toEvents(eventsService.publicEvents).filter(isFuture)
     val ongoing = toEvents(eventsService.ongoingEvents).filter(isFuture)
     val repeating = toEvents(eventsService.repeatingEvents).filter(isFuture)
-    val sermons = toSermons(eventsService.sermons)
-    val lastSermon = sermons.maxBy { it.addedOn }
 
     val nextSunday = now.plusWeeks(1).plusDays(1)
     val nextMonth = now.plus(1, ChronoUnit.MONTHS).plusDays(1)
 
-    val thisWeekItems = repeating
-      .filter { it.dateRange.lowerEndpoint()?.isAfter(now) ?: false }
-      .filter { it.dateRange.lowerEndpoint()?.isBefore(nextSunday) ?: false }
+    val thisWeek = Range.closed(now, nextSunday)
+
+    val thisWeekItems = (repeating + events)
+      .filter { it.dateRange.isConnected(thisWeek) }
 
     val ongoingItems: List<Event> = ongoing
-      //.filter { it.dateRange.lowerEndpoint()?.isBefore(now) ?: false }
-      //.filter { it.dateRange.upperEndpoint()?.isAfter(nextSunday) ?: false }
 
-    var futureItems = events
+    val futureItems = events
       .filter { it !in thisWeekItems }
       .filter { it !in ongoingItems }
       .filter { it.dateRange.upperEndpoint()?.isBefore(nextMonth) ?: false}
@@ -42,15 +39,10 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
     val value = WeeklyItems (
       thisWeekItems = thisWeekItems,
       futureItems = futureItems,
-      ongoingItems = ongoingItems,
-      lastSermon = lastSermon.displaySermon()
+      ongoingItems = ongoingItems
     )
 
     return value
-  }
-
-  private fun Sermon?.displaySermon(): DisplaySermon? {
-    return null
   }
 
   private fun toEvents(eventsStr: String): List<Event> {
@@ -58,7 +50,7 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
     return events.upcoming + events.past
   }
 
-  private fun toSermons(eventsStr: String) =
+  fun toSermons(eventsStr: String) =
     objectMapper.readValue(eventsStr, Sermons::class.java).items
 
 }

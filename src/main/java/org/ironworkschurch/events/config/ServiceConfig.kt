@@ -6,10 +6,10 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.io.Resources
 import dagger.Module
 import dagger.Provides
-import org.ironworkschurch.events.service.EventsService
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.nio.charset.Charset
 import java.util.*
 import javax.inject.Named
 import javax.inject.Singleton
@@ -17,8 +17,14 @@ import javax.inject.Singleton
 @Module
 class ServiceConfig {
   private val properties: Properties
+  private val emailLookup: Map<String, String>
 
   init {
+    this.properties = getAppProperties()
+    this.emailLookup = getEmailLookupMap()
+  }
+
+  private fun getAppProperties(): Properties {
     val properties = Properties()
     try {
       Resources.getResource("application.properties").openStream().use { stream -> properties.load(stream) }
@@ -35,9 +41,30 @@ class ServiceConfig {
       }
 
     }
-
-    this.properties = properties
+    return properties
   }
+
+  private fun getEmailLookupMap(): Map<String, String> {
+    val emailMap = try {
+      Resources.readLines(Resources.getResource("emaillookup.csv"), Charset.defaultCharset()).parseToMap()
+    } catch (e: IOException) {
+      throw RuntimeException(e)
+    }
+
+    val emailLookupFile = File("emaillookup.csv")
+    if (emailLookupFile.exists()) {
+      val map = emailLookupFile.readLines().parseToMap()
+      emailMap.putAll(map)
+    }
+
+    return emailMap.toMap()
+  }
+
+  private fun List<String>.parseToMap() =
+    map { it.split(delimiters = ',', limit = 2) }
+    .map { it[0] to it[1] }
+    .toMap()
+    .toMutableMap()
 
   @Provides
   @Named("org.ironworkschurch.events-url")
@@ -69,17 +96,6 @@ class ServiceConfig {
     return properties.getProperty("org.ironworkschurch.sermons-url")
   }
 
-  @Provides
-  @Singleton
-  internal fun provideEventsService(@Named("org.ironworkschurch.events-url") newEventsUrl: String,
-                                    @Named("org.ironworkschurch.hidden-events-url") hiddenEventsUrl: String,
-                                    @Named("org.ironworkschurch.repeating-events-url") repeatingEventsUrl: String,
-                                    @Named("org.ironworkschurch.ongoing-events-url") ongoingEventsUrl: String,
-                                    @Named("org.ironworkschurch.sermons-url") sermonsUrl: String,
-                                    objectMapper: ObjectMapper): EventsService {
-    return EventsService(newEventsUrl, hiddenEventsUrl, ongoingEventsUrl, repeatingEventsUrl, sermonsUrl, objectMapper)
-  }
-
 
   val objectMapper: ObjectMapper
     @Provides
@@ -90,4 +106,11 @@ class ServiceConfig {
               .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
       return objectMapper
     }
+
+  @Provides
+  fun provideEmailLookup() = emailLookup
+
+  @Provides
+  @Named("org.ironworkschurch.url-root")
+  fun provideIwcUrlRoot(): String = properties.getProperty("org.ironworkschurch.url-root")
 }

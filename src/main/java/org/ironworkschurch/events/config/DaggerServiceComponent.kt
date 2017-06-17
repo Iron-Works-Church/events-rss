@@ -5,6 +5,7 @@ import dagger.internal.DoubleCheck
 import dagger.internal.Factory
 import org.ironworkschurch.events.Application
 import org.ironworkschurch.events.EventsManager
+import org.ironworkschurch.events.SermonManager
 import org.ironworkschurch.events.service.EventsService
 import javax.inject.Provider
 
@@ -18,12 +19,14 @@ class DaggerServiceComponent private constructor() : ServiceComponent {
   private lateinit var provideEventsServiceProvider: Provider<EventsService>
   private lateinit var eventsManagerProvider: Provider<EventsManager>
   private lateinit var applicationProvider: Provider<Application>
-
-  override fun getEventsManager(): EventsManager = eventsManagerProvider.get()
+  private lateinit var sermonManagerProvider: Provider<SermonManager>
+  private lateinit var provideEmailLookup: Provider<Map<String, String>>
+  private lateinit var provideUrlRoot: Provider<String>
 
   override fun getApplication(): Application = applicationProvider.get()
 
   companion object {
+
     fun create(): ServiceComponent {
       return DaggerServiceComponent().apply {
         val serviceConfig = ServiceConfig()
@@ -33,19 +36,24 @@ class DaggerServiceComponent private constructor() : ServiceComponent {
         provideOngoingEventsUrlProvider = Factory { serviceConfig.provideOngoingEventsUrl() }
         provideSermonsUrlProvider = Factory { serviceConfig.provideSermonsUrl() }
         getObjectMapperProvider = DoubleCheck.provider({ serviceConfig.objectMapper })
-        provideEventsServiceProvider = DoubleCheck.provider(
-                {
-                  serviceConfig.provideEventsService(
-                          provideEventsUrlProvider.get(),
-                          provideHiddenEventsUrlProvider.get(),
-                          provideRepeatingEventsUrlProvider.get(),
-                          provideOngoingEventsUrlProvider.get(),
-                          provideSermonsUrlProvider.get(),
-                          getObjectMapperProvider.get())
-                })
+        provideEventsServiceProvider = Factory { EventsService(
+          provideEventsUrlProvider.get(),
+          provideHiddenEventsUrlProvider.get(),
+          provideOngoingEventsUrlProvider.get(),
+          provideRepeatingEventsUrlProvider.get(),
+          provideSermonsUrlProvider.get(),
+          getObjectMapperProvider.get())
+        }
 
-        eventsManagerProvider = Factory { EventsManager(provideEventsServiceProvider.get(), getObjectMapperProvider.get()) }
-        applicationProvider = Factory { Application(eventsManagerProvider.get()) }
+        provideEmailLookup = Factory { serviceConfig.provideEmailLookup() }
+        provideUrlRoot = Factory { serviceConfig.provideIwcUrlRoot() }
+        eventsManagerProvider = Factory {
+          EventsManager(provideEventsServiceProvider.get(), getObjectMapperProvider.get())
+        }
+        sermonManagerProvider = Factory {
+          SermonManager(provideEventsServiceProvider.get(), getObjectMapperProvider.get(), provideEmailLookup.get(), provideUrlRoot.get())
+        }
+        applicationProvider = Factory { Application(eventsManagerProvider.get(), sermonManagerProvider.get()) }
       }
     }
   }
