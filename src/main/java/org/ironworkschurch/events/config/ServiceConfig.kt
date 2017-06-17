@@ -7,14 +7,12 @@ import com.google.common.io.Resources
 import dagger.Module
 import dagger.Provides
 import org.ironworkschurch.events.service.EventsService
-
-import javax.inject.Named
-import javax.inject.Singleton
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.io.InputStream
-import java.util.Properties
+import java.util.*
+import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 class ServiceConfig {
@@ -54,11 +52,32 @@ class ServiceConfig {
   }
 
   @Provides
+  @Named("org.ironworkschurch.repeating-events-url")
+  internal fun provideRepeatingEventsUrl(): String {
+    return properties.getProperty("org.ironworkschurch.repeating-events-url")
+  }
+
+  @Provides
+  @Named("org.ironworkschurch.ongoing-events-url")
+  internal fun provideOngoingEventsUrl(): String {
+    return properties.getProperty("org.ironworkschurch.ongoing-events-url")
+  }
+
+  @Provides
+  @Named("org.ironworkschurch.sermons-url")
+  internal fun provideSermonsUrl(): String {
+    return properties.getProperty("org.ironworkschurch.sermons-url")
+  }
+
+  @Provides
   @Singleton
   internal fun provideEventsService(@Named("org.ironworkschurch.events-url") newEventsUrl: String,
                                     @Named("org.ironworkschurch.hidden-events-url") hiddenEventsUrl: String,
+                                    @Named("org.ironworkschurch.repeating-events-url") repeatingEventsUrl: String,
+                                    @Named("org.ironworkschurch.ongoing-events-url") ongoingEventsUrl: String,
+                                    @Named("org.ironworkschurch.sermons-url") sermonsUrl: String,
                                     objectMapper: ObjectMapper): EventsService {
-    return EventsService(newEventsUrl, hiddenEventsUrl, objectMapper)
+    return EventsService(newEventsUrl, hiddenEventsUrl, ongoingEventsUrl, repeatingEventsUrl, sermonsUrl, objectMapper)
   }
 
 

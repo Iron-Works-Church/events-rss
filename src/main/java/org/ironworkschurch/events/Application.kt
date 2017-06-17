@@ -1,7 +1,6 @@
 package org.ironworkschurch.events
 
 import org.ironworkschurch.events.config.DaggerServiceComponent
-import org.ironworkschurch.events.config.ServiceConfig
 import org.ironworkschurch.events.dto.json.Event
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
