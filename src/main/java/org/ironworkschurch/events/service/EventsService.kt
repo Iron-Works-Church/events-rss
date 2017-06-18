@@ -11,7 +11,8 @@ open class EventsService constructor(val eventsUrl: String,
                                      val ongoingEventsUrl: String,
                                      val repeatingEventsUrl: String,
                                      val sermonsUrl: String,
-                                     private val objectMapper: ObjectMapper) {
+                                     private val objectMapper: ObjectMapper,
+                                     val sleepMillis: Long) {
   private val logger = LoggerFactory.getLogger(EventsService::class.java)
 
   val rss: List<Event>
@@ -30,6 +31,7 @@ open class EventsService constructor(val eventsUrl: String,
 
   private fun getContents(name: String, pageUrl: String): String {
     logger.debug("Fetching $name RSS")
+    Thread.sleep(sleepMillis)
     val url = URL("$pageUrl?format=json")
     val connection = url.openConnection()
     connection.setRequestProperty("Accept-Encoding", "gzip")

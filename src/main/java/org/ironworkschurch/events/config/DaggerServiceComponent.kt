@@ -23,6 +23,7 @@ class DaggerServiceComponent private constructor() : ServiceComponent {
   private lateinit var sermonManagerProvider: Provider<SermonManager>
   private lateinit var provideEmailLookup: Provider<Map<String, String>>
   private lateinit var provideUrlRoot: Provider<String>
+  private lateinit var provideSleepTime: Provider<Long>
 
   override fun getApplication(): Application = applicationProvider.get()
 
@@ -35,12 +36,14 @@ class DaggerServiceComponent private constructor() : ServiceComponent {
         provideOngoingEventsUrlProvider = Factory { serviceConfig.provideOngoingEventsUrl() }
         provideSermonsUrlProvider = Factory { serviceConfig.provideSermonsUrl() }
         getObjectMapperProvider = DoubleCheck.provider({ serviceConfig.objectMapper })
+        provideSleepTime = DoubleCheck.provider({ serviceConfig.provideSleepTime() })
         provideEventsServiceProvider = Factory { EventsService(
                 provideEventsUrlProvider.get(),
                 provideOngoingEventsUrlProvider.get(),
                 provideRepeatingEventsUrlProvider.get(),
                 provideSermonsUrlProvider.get(),
-                getObjectMapperProvider.get())
+                getObjectMapperProvider.get(),
+                provideSleepTime.get())
         }
 
         templateEngineProvider = DoubleCheck.provider({ serviceConfig.templateEngine })

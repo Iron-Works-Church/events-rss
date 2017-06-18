@@ -119,4 +119,8 @@ class ServiceConfig {
   @Provides
   @Named("org.ironworkschurch.url-root")
   fun provideIwcUrlRoot(): String = properties.getProperty("org.ironworkschurch.url-root")
+
+  @Provides
+  @Named("org.ironworkschurch.sleep-time")
+  fun provideSleepTime() = properties.getProperty("org.ironworkschurch.sleep-time", "100").toLong()
 }
