@@ -1,9 +1,9 @@
 package org.ironworkschurch.events.config;
 
+import javax.inject.Singleton;
+
 import dagger.Component;
 import org.ironworkschurch.events.Application;
-
-import javax.inject.Singleton;
 
 @Component(modules = ServiceConfig.class)
 @Singleton

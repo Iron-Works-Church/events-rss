@@ -1,24 +1,34 @@
 package org.ironworkschurch.events
 
 import org.ironworkschurch.events.config.DaggerServiceComponent
+import org.ironworkschurch.events.dto.DisplaySermon
+import org.ironworkschurch.events.dto.WeeklyItems
+import org.ironworkschurch.events.dto.json.Event
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import javax.inject.Inject
 
 open class Application @Inject constructor(val eventsManager: EventsManager,
+                                           val sermonManager: SermonManager,
                                            val templateEngine: TemplateEngine) {
   fun run() {
     log.debug("retrieving events")
-    /*val fakeWeekly = Triple(listOf<List<Event>>(), listOf<List<Event>>(), listOf<List<Event>>())
-    val (thisWeekItems, futureItems, ongoingItems) = fakeWeekly*/
-    val (thisWeekItems, futureItems, ongoingItems, lastSermon) = eventsManager.getWeeklyItems()
+    //val fakeWeekly = Triple(listOf<List<Event>>(), listOf<List<Event>>(), listOf<List<Event>>())
+    val weeklyItems = eventsManager.getWeeklyItems()
+    val lastSermon = sermonManager.getLastSermon()
 
+    val output = renderOutput(weeklyItems, lastSermon, templateEngine)
+    println(output)
+  }
+
+  fun renderOutput(weeklyItems: WeeklyItems, lastSermon: DisplaySermon?, templateEngine: TemplateEngine): String? {
     val context = Context().apply {
-      setVariable("thisWeek", thisWeekItems)
-      setVariable("upcoming", futureItems)
-      setVariable("ongoing", ongoingItems)
+      setVariable("thisWeek", weeklyItems.thisWeekItems)
+      setVariable("upcoming", weeklyItems.futureItems)
+      setVariable("ongoing", weeklyItems.ongoingItems)
       setVariable("lastSermon", lastSermon)
     }
 
@@ -26,7 +36,7 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
     val output = templateEngine.process("view", context)
 
     log.debug("complete")
-    println(output)
+    return output
   }
 
   companion object {
@@ -41,6 +51,13 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
 
       application.run()
     }
+  }
+
+  fun templateEngine() = TemplateEngine().apply {
+    setTemplateResolver(ClassLoaderTemplateResolver().apply {
+      prefix = "templates/"
+      suffix = ".html"
+    })
   }
 }
 

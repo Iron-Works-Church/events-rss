@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Events(
-  val upcoming: List<Event>,
+  val upcoming: List<Event> = listOf(),
   val past: List<Event> = listOf()
 )
 
@@ -21,12 +21,12 @@ data class Event(
   val categories: List<String> = listOf(),
   val workflowState: Int,
   val publishOn: Long,
-  val author: Author,
-  val title: String,
-  val sourceUrl: String,
-  val body: String,
-  val excerpt: String,
-  val fullUrl: String,
+  val author: Author?,
+  val title: String?,
+  val sourceUrl: String?,
+  val body: String?,
+  val excerpt: String?,
+  val fullUrl: String?,
   val startDate: Long,
   val endDate: Long
 ) {
@@ -40,15 +40,20 @@ data class Author(val displayName: String)
 
 typealias EpochSeconds = Long
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Sermons (val items: List<SermonItem>)
+data class Sermons(
+        val items: List<Sermon> = listOf()
+)
 
-val authorRegex = """data-author="([^"]+)"""".toRegex()
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class SermonItem (val title: String, val fullUrl: String, val body: String, val addedOn: Long) {
-  val authorName: String? get() = getData(authorRegex)
-  val url: String? get() = "https://ironworkschurch.org$fullUrl"
-
-  private fun getData(regex: Regex) = regex.find(body)?.groupValues?.get(1)
-}
+data class Sermon(
+        val id: String,
+        //val collectionId: String,
+        val title: String,
+        //val publishOn: Long,
+        val addedOn: Long,
+        //val updatedOn: Long,
+        //val recordType: Int,
+        val fullUrl: String?,
+        val body: String,
+        val excerpt: String?,
+        val tags: List<String> = listOf()
+)

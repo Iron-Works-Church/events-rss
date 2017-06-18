@@ -1,35 +1,34 @@
 package org.ironworkschurch.events.service
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.ironworkschurch.events.dto.json.Event
 import org.ironworkschurch.events.dto.json.Events
-import org.ironworkschurch.events.dto.json.SermonItem
-import org.ironworkschurch.events.dto.json.Sermons
 import org.slf4j.LoggerFactory
-import java.io.Reader
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
-class EventsService constructor(
-  val eventsUrl: String,
-  val hiddenEventsUrl: String,
-  val sermonsUrl: String,
-  private val objectMapper: ObjectMapper) {
+open class EventsService constructor(val eventsUrl: String,
+                                     val ongoingEventsUrl: String,
+                                     val repeatingEventsUrl: String,
+                                     val sermonsUrl: String,
+                                     private val objectMapper: ObjectMapper) {
   private val logger = LoggerFactory.getLogger(EventsService::class.java)
 
   val rss: List<Event>
-    get() = listOf(publicEvents, hiddenEvents)
-      .map { it.use { objectMapper.readValue(it, Events::class.java) } }
+    get() = listOf(publicEvents, ongoingEvents, repeatingEvents)
+      .map { objectMapper.readValue(it, Events::class.java) }
       .flatMap { it.upcoming + it.past }
 
-  val publicEvents: Reader
+  open val publicEvents: String
     get() = getContents("public events", eventsUrl)
 
-  val hiddenEvents: Reader
-    get() = getContents("hidden events", hiddenEventsUrl)
+  open val ongoingEvents: String
+    get() = getContents("ongoing events", ongoingEventsUrl)
 
-  private fun getContents(name: String, pageUrl: String): Reader {
+  open val repeatingEvents: String
+    get() = getContents("repeating events", repeatingEventsUrl)
+
+  private fun getContents(name: String, pageUrl: String): String {
     logger.debug("Fetching $name RSS")
     val url = URL("$pageUrl?format=json")
     val connection = url.openConnection()
@@ -40,13 +39,9 @@ class EventsService constructor(
       connection.getInputStream()
     }
 
-    return inputStream.bufferedReader(Charsets.UTF_8)
+    return inputStream.bufferedReader(Charsets.UTF_8).readText()
   }
 
-  val sermons: List<SermonItem>
-    get() = getContents("sermons", sermonsUrl)
-            .use {
-              objectMapper.readValue(it, Sermons::class.java)
-            }
-            .items
+  open val sermons: String
+   get() = getContents("sermons", sermonsUrl)
 }

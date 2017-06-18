@@ -32,7 +32,7 @@
     </p>
     <p>
         <b>Last Week's Sermon</b>
-        <a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a> | <span th:text="${lastSermon.authorName}"></span>
+        <span><p><strong><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></strong>&nbsp;|&nbsp;<strong><a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></p></span>
     </p>
 </div>
 </body>
