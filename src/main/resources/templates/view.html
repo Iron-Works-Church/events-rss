@@ -5,47 +5,58 @@
     <title>Iron Works Church events</title>
     <style>
         h2 {
-  font-size: 48px;
-  font-weight: bold;
-  font-family: lucida sans unicode,lucida grande,sans-serif;
-  text-align: center;
-}
+          font-size: 48px;
+          font-weight: bold;
+          font-family: lucida sans unicode,lucida grande,sans-serif;
+          text-align: center;
+        }
 
-#logo {
-  text-align:center;
-}
+        #logo {
+          text-align:center;
+        }
 
-#logo img {
-  width: 150px;
-  height: 150px;
-}
+        #logo img {
+          width: 150px;
+          height: 150px;
+        }
 
-p * {
-  font-family: lucida sans unicode,lucida grande,sans-serif;
-  font-size: 14px;
+        p * {
+          font-family: lucida sans unicode,lucida grande,sans-serif;
+          font-size: 14px;
+        }
 
-}
+        div.sermon * {
+          font-family: lucida sans unicode,lucida grande,sans-serif;
+          font-size: 14px;
+        }
 
-.category {
-  font-family: lucida sans unicode,lucida grande,sans-serif;
-  font-size: 20px;
-  color: #696969;
-}
+        .category {
+          font-family: lucida sans unicode,lucida grande,sans-serif;
+          font-size: 20px;
+          color: #696969;
+        }
 
-p {
-  font-family: lucida sans unicode,lucida grande,sans-serif;
-  font-size: 14px;
-  display: block;
-  margin-before: 1em;
-  margin-after: 1em;
-}
+        p {
+          font-family: lucida sans unicode,lucida grande,sans-serif;
+          font-size: 14px;
+          display: block;
+          margin-before: 1em;
+          margin-after: 1em;
+        }
 
+        div.sermon {
+          font-family: lucida sans unicode,lucida grande,sans-serif;
+          font-size: 14px;
+          display: block;
+          margin-before: 1em;
+          margin-after: 1em;
+        }
     </style>
 </head>
 <body>
 <div id="logo"><img src="iwc-logo.jpg" /></div>
 <h2>The Weekly</h2>
-<table border="0" cellpadding="0" cellspacing="0" height="100%" id="bodyTable" width="100%">
+<table border="0" cellpadding="0" cellspacing="0" id="bodyTable" width="100%">
     <tbody>
     <tr>
         <td align="center" valign="top">
@@ -80,7 +91,7 @@ p {
                                         </p>
                                         <p>
                                             <b>Last Week's Sermon</b>
-                                            <span><p><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i></strong>&nbsp;|&nbsp;<strong><a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></p></span>
+                                            <div class="sermon"><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i></strong>&nbsp;|&nbsp;<strong><a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></div>
                                         </p>
                                     </div>
                                 </td>
