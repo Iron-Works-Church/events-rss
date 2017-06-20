@@ -3,37 +3,107 @@
 <head>
     <meta charset="UTF-8"/>
     <title>Iron Works Church events</title>
-    <link href="weekly.css" rel="stylesheet" />
+    <style>
+        h2 {
+  font-size: 48px;
+  font-weight: bold;
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  text-align: center;
+}
+
+#logo {
+  text-align:center;
+}
+
+#logo img {
+  width: 150px;
+  height: 150px;
+}
+
+p * {
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  font-size: 14px;
+
+}
+
+.category {
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  font-size: 20px;
+  color: #696969;
+}
+
+p {
+  font-family: lucida sans unicode,lucida grande,sans-serif;
+  font-size: 14px;
+  display: block;
+  margin-before: 1em;
+  margin-after: 1em;
+}
+
+    </style>
 </head>
 <body>
 <div id="logo"><img src="iwc-logo.jpg" /></div>
 <h2>The Weekly</h2>
-<div>
-    <p><b class="category">This Week</b></p>
-    <p th:each="item : ${thisWeek}">
-        <b th:text="${item.title}"></b>
-        <span th:utext="${item.excerpt}"></span>
-    </p>
-</div>
-<p></p>
-<div>
-    <p><b class="category">Upcoming</b></p>
-    <p th:each="item : ${upcoming}">
-        <b th:text="${item.title}"></b>
-        <span th:utext="${item.excerpt}"></span>
-    </p>
-</div>
-<p></p>
-<div>
-    <p><b class="category">Ongoing</b></p>
-    <p th:each="item : ${ongoing}">
-        <b th:text="${item.title}"></b>
-        <span th:utext="${item.excerpt}"></span>
-    </p>
-    <p>
-        <b>Last Week's Sermon</b>
-        <span><p><strong><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></strong>&nbsp;|&nbsp;<strong><a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></p></span>
-    </p>
-</div>
+<table border="0" cellpadding="0" cellspacing="0" height="100%" id="bodyTable" width="100%">
+    <tbody>
+    <tr>
+        <td align="center" valign="top">
+            <table border="0" cellpadding="0" cellspacing="0" id="emailContainer" width="660">
+                <tr>
+                    <td align="center" valign="top">
+                        <table border="0" cellpadding="0" cellspacing="0" id="emailBody" width="100%">
+                            <tbody>
+                            <tr>
+                                <td align="left" valign="top">
+                                    <div>
+                                        <p><b class="category">This Week</b></p>
+                                        <p th:each="item : ${thisWeek}">
+                                            <b th:text="${item.title}"></b>
+                                            <span th:utext="${item.excerpt}"></span>
+                                        </p>
+                                    </div>
+                                    <p></p>
+                                    <div>
+                                        <p><b class="category">Upcoming</b></p>
+                                        <p th:each="item : ${upcoming}">
+                                            <b th:text="${item.title}"></b>
+                                            <span th:utext="${item.excerpt}"></span>
+                                        </p>
+                                    </div>
+                                    <p></p>
+                                    <div>
+                                        <p><b class="category">Ongoing</b></p>
+                                        <p th:each="item : ${ongoing}">
+                                            <b th:text="${item.title}"></b>
+                                            <span th:utext="${item.excerpt}"></span>
+                                        </p>
+                                        <p>
+                                            <b>Last Week's Sermon</b>
+                                            <span><p><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i></strong>&nbsp;|&nbsp;<strong><a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></p></span>
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" valign="top">
+                        <table border="0" cellpadding="0" cellspacing="0" id="emailFooter" width="100%">
+                            <tbody>
+                            <tr>
+                                <td align="center" valign="top"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><span style="font-size:10px;"><strong><font color="#333333"><a href="http://ironworkschurch.org/">Iron Works Church</a> | 400 Franklin Ave. | Suite 245 | Phoenixville |&nbsp;<a href="mailto:info@ironworkschurch.org">info@ironworkschurch.org</a></font></strong></span></span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>
