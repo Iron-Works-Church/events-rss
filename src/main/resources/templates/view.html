@@ -91,7 +91,7 @@
                                         </p>
                                         <p>
                                             <b>Last Week's Sermon</b>
-                                            <div class="sermon"><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i></strong>&nbsp;|&nbsp;<strong><a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></div>
+                                            <div class="sermon"><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i>&nbsp;|&nbsp;<a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></div>
                                         </p>
                                     </div>
                                 </td>
@@ -105,7 +105,11 @@
                         <table border="0" cellpadding="0" cellspacing="0" id="emailFooter" width="100%">
                             <tbody>
                             <tr>
-                                <td align="center" valign="top"><span style="font-family:lucida sans unicode,lucida grande,sans-serif;"><span style="font-size:10px;"><strong><font color="#333333"><a href="http://ironworkschurch.org/">Iron Works Church</a> | 400 Franklin Ave. | Suite 245 | Phoenixville |&nbsp;<a href="mailto:info@ironworkschurch.org">info@ironworkschurch.org</a></font></strong></span></span></td>
+                                <td align="center" valign="top">
+                                    <span style="font-family:lucida sans unicode,lucida grande,sans-serif; font-size:10px; color:#333333;">
+                                        <strong><a href="http://ironworkschurch.org/">Iron Works Church</a> | 400 Franklin Ave. | Suite 245 | Phoenixville |&nbsp;<a href="mailto:info@ironworkschurch.org">info@ironworkschurch.org</a></strong>
+                                    </span>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
