@@ -26,9 +26,9 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
 
   fun renderOutput(weeklyItems: WeeklyItems, lastSermon: DisplaySermon?, templateEngine: TemplateEngine): String? {
     val context = Context().apply {
-      setVariable("thisWeek", weeklyItems.thisWeekItems)
-      setVariable("upcoming", weeklyItems.futureItems)
-      setVariable("ongoing", weeklyItems.ongoingItems)
+      setVariable("thisWeek", weeklyItems.thisWeekItems.map { it.stripClosingP() })
+      setVariable("upcoming", weeklyItems.futureItems.map { it.stripClosingP() })
+      setVariable("ongoing", weeklyItems.ongoingItems.map { it.stripClosingP() })
       setVariable("lastSermon", lastSermon)
     }
 
@@ -60,4 +60,6 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
     })
   }
 }
+
+private fun Event.stripClosingP() = copy(excerpt = this.excerpt?.removeSurrounding("<p>", "</p>"))
 
