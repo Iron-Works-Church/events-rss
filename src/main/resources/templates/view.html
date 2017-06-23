@@ -4,12 +4,12 @@
     <meta charset="UTF-8"/>
     <title>Iron Works Church events</title>
     <style>
-        @import url('https://fonts.googleapis.com/css?family=Raleway');
+        @import url('https://fonts.googleapis.com/css?family=Montserrat');
 
         h2 {
           font-size: 48px;
           font-weight: bold;
-          font-family: 'Raleway',lucida sans unicode,lucida grande,sans-serif;
+          font-family: 'Montserrat',lucida sans unicode,lucida grande,sans-serif;
           text-align: center;
         }
 
@@ -23,23 +23,23 @@
         }
 
         p * {
-          font-family: 'Raleway',lucida sans unicode,lucida grande,sans-serif;
+          font-family: 'Montserrat',lucida sans unicode,lucida grande,sans-serif;
           font-size: 14px;
         }
 
         div.sermon * {
-          font-family: 'Raleway',lucida sans unicode,lucida grande,sans-serif;
+          font-family: 'Montserrat',lucida sans unicode,lucida grande,sans-serif;
           font-size: 14px;
         }
 
         .category {
-          font-family: 'Raleway',lucida sans unicode,lucida grande,sans-serif;
+          font-family: 'Montserrat',lucida sans unicode,lucida grande,sans-serif;
           font-size: 20px;
           color: #696969;
         }
 
         p {
-          font-family: 'Raleway',lucida sans unicode,lucida grande,sans-serif;
+          font-family: 'Montserrat',lucida sans unicode,lucida grande,sans-serif;
           font-size: 14px;
           display: block;
           margin-before: 1em;
@@ -47,7 +47,7 @@
         }
 
         div.sermon {
-          font-family: 'Raleway',lucida sans unicode,lucida grande,sans-serif;
+          font-family: 'Montserrat',lucida sans unicode,lucida grande,sans-serif;
           font-size: 14px;
           display: block;
           margin-before: 1em;
@@ -72,7 +72,7 @@
                                     <div>
                                         <p><b class="category">This Week</b></p>
                                         <p th:each="item : ${thisWeek}">
-                                            <b th:text="${item.title}"></b>
+                                            <strong th:text="${item.title}"></strong>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                     </div>
@@ -80,7 +80,7 @@
                                     <div>
                                         <p><b class="category">Upcoming</b></p>
                                         <p th:each="item : ${upcoming}">
-                                            <b th:text="${item.title}"></b>
+                                            <strong th:text="${item.title}"></strong>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                     </div>
@@ -88,11 +88,11 @@
                                     <div>
                                         <p><b class="category">Ongoing</b></p>
                                         <p th:each="item : ${ongoing}">
-                                            <b th:text="${item.title}"></b>
+                                            <strong th:text="${item.title}"></strong>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                         <p>
-                                            <b>Last Week's Sermon</b>
+                                            <strong>Last Week's Sermon</strong>
                                             <div class="sermon"><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i>&nbsp;|&nbsp;<a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></div>
                                         </p>
                                     </div>
@@ -108,7 +108,7 @@
                             <tbody>
                             <tr>
                                 <td align="center" valign="top">
-                                    <span style="font-family:'Raleway',lucida sans unicode,lucida grande,sans-serif; font-size:10px; color:#333333;">
+                                    <span style="font-family:'Montserrat',lucida sans unicode,lucida grande,sans-serif; font-size:10px; color:#333333;">
                                         <strong><a href="http://ironworkschurch.org/">Iron Works Church</a> | 400 Franklin Ave. | Suite 245 | Phoenixville |&nbsp;<a href="mailto:info@ironworkschurch.org">info@ironworkschurch.org</a></strong>
                                     </span>
                                 </td>
