@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <title>Iron Works Church events</title>
     <style>
-        @import url('https://fonts.googleapis.com/css?family=Montserrat');
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:regular,600');
 
         h2 {
           font-size: 48px;
@@ -72,7 +72,7 @@
                                     <div>
                                         <p><b class="category">This Week</b></p>
                                         <p th:each="item : ${thisWeek}">
-                                            <strong th:text="${item.title}"></strong>
+                                            <strong th:text="${item.title} + @{.}"></strong>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                     </div>
@@ -80,7 +80,7 @@
                                     <div>
                                         <p><b class="category">Upcoming</b></p>
                                         <p th:each="item : ${upcoming}">
-                                            <strong th:text="${item.title}"></strong>
+                                            <strong th:text="${item.title} + @{.}"></strong>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                     </div>
@@ -88,12 +88,12 @@
                                     <div>
                                         <p><b class="category">Ongoing</b></p>
                                         <p th:each="item : ${ongoing}">
-                                            <strong th:text="${item.title}"></strong>
+                                            <strong th:text="${item.title} + @{.}"></strong>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                         <p>
-                                            <strong>Last Week's Sermon</strong>
-                                            <div class="sermon"><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i>&nbsp;|&nbsp;<a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></div>
+                                            <strong>Last Week's Sermon</strong><br />
+                                            <span class="sermon"><strong><i><a th:href="${lastSermon.url}" th:text="${lastSermon.title}"></a></i>&nbsp;|&nbsp;<a th:href="@{mailto:} + ${lastSermon.authorEmail}" th:utext="${lastSermon.author}"></a></strong></span>
                                         </p>
                                     </div>
                                 </td>
