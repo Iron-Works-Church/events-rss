@@ -4,9 +4,6 @@ import mu.KotlinLogging
 import org.ironworkschurch.events.config.DaggerServiceComponent
 import org.ironworkschurch.events.dto.DisplaySermon
 import org.ironworkschurch.events.dto.WeeklyItems
-import org.ironworkschurch.events.dto.json.Event
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
@@ -29,9 +26,9 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
 
   fun renderOutput(weeklyItems: WeeklyItems, lastSermon: DisplaySermon?, templateEngine: TemplateEngine): String? {
     val context = Context().apply {
-      setVariable("thisWeek", weeklyItems.thisWeekItems.map { it.stripClosingP() })
-      setVariable("upcoming", weeklyItems.futureItems.map { it.stripClosingP() })
-      setVariable("ongoing", weeklyItems.ongoingItems.map { it.stripClosingP() })
+      setVariable("thisWeek", weeklyItems.thisWeekItems)
+      setVariable("upcoming", weeklyItems.futureItems)
+      setVariable("ongoing", weeklyItems.ongoingItems)
       setVariable("lastSermon", lastSermon)
     }
 
@@ -69,5 +66,4 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
   }
 }
 
-private fun Event.stripClosingP() = copy(excerpt = this.excerpt?.removeSurrounding("<p>", "</p>"))
 

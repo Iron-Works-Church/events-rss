@@ -3,12 +3,14 @@ package org.ironworkschurch.events
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Range
 import mu.KotlinLogging
+import org.ironworkschurch.events.dto.DisplayEvent
 import org.ironworkschurch.events.dto.DisplaySermon
 import org.ironworkschurch.events.dto.WeeklyItems
 import org.ironworkschurch.events.dto.json.Event
 import org.ironworkschurch.events.dto.json.Events
 import org.ironworkschurch.events.service.EventsService
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
@@ -50,13 +52,28 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
       .filter { it !in ongoingItems }
       .filter { it.dateRange.upperEndpoint()?.isBefore(nextMonth) ?: false}
 
+
     logger.debug { "Found ${futureItems.size} items for \"upcoming\"" }
 
     return WeeklyItems (
-      thisWeekItems = thisWeekItems,
-      futureItems = futureItems,
-      ongoingItems = ongoingItems
+      thisWeekItems = thisWeekItems.map { toDisplayItem(it) },
+      futureItems = futureItems.map { toDisplayItem(it) },
+      ongoingItems = ongoingItems.map { toDisplayItem(it) }
     )
+  }
+
+  private fun toDisplayItem(event: Event): DisplayEvent {
+    val dateRange = event.dateRange
+    val startDate = dateRange.lowerEndpoint().truncatedTo(ChronoUnit.DAYS)
+    val endDate = dateRange.upperEndpoint().truncatedTo(ChronoUnit.DAYS)
+    val dateStr: String? =
+            when (startDate) {
+              endDate -> startDate.format(DateTimeFormatter.ofPattern("MMMM d"))
+              else -> null
+            }
+    return DisplayEvent(title = event.title,
+            excerpt = event.excerpt?.removeSurrounding("<p>", "</p>"),
+            date = dateStr)
   }
 
   private fun toEvents(eventsStr: String): List<Event> {

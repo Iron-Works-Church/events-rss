@@ -72,7 +72,7 @@
                                     <div>
                                         <p><b class="category">This Week</b></p>
                                         <p th:each="item : ${thisWeek}">
-                                            <strong th:text="${item.title} + @{.}"></strong>
+                                            <strong th:text="${item.title} + @{.}"></strong> <i th:if="${item.date != null}" th:text=" ${item.date} + @{.}"></i>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                     </div>
@@ -80,7 +80,7 @@
                                     <div>
                                         <p><b class="category">Upcoming</b></p>
                                         <p th:each="item : ${upcoming}">
-                                            <strong th:text="${item.title} + @{.}"></strong>
+                                            <strong th:text="${item.title} + @{.}"></strong> <i th:if="${item.date != null}" th:text=" ${item.date} + @{.}"></i>
                                             <span th:utext="${item.excerpt}"></span>
                                         </p>
                                     </div>

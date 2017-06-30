@@ -30,7 +30,7 @@ open class EventsService constructor(val eventsUrl: String,
     get() = getContents("repeating events", repeatingEventsUrl)
 
   private fun getContents(name: String, pageUrl: String): String {
-    logger.debug("Fetching $name json")
+    logger.debug("Fetching $name json after sleeping for ${sleepMillis / 1000} seconds")
     Thread.sleep(sleepMillis)
     val url = URL("$pageUrl?format=json")
     val connection = url.openConnection()
