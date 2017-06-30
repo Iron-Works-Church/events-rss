@@ -52,7 +52,12 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
       log.debug("injecting dependencies")
       val application = DaggerServiceComponent.create().application
 
-      application.run()
+      try {
+        application.run()
+      } catch (e: Exception) {
+        log.error(e, { "Failed to retrieve events" })
+        throw e
+      }
     }
   }
 
