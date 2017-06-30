@@ -4,23 +4,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Range
 import mu.KotlinLogging
 import org.ironworkschurch.events.dto.DisplayEvent
-import org.ironworkschurch.events.dto.DisplaySermon
 import org.ironworkschurch.events.dto.WeeklyItems
 import org.ironworkschurch.events.dto.json.Event
 import org.ironworkschurch.events.dto.json.Events
 import org.ironworkschurch.events.service.EventsService
+import java.time.Clock
+import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 
 open class EventsManager @Inject constructor(val eventsService: EventsService,
-                                             private val objectMapper: ObjectMapper) {
+                                             private val objectMapper: ObjectMapper,
+                                             private val clock: Clock = Clock.systemDefaultZone()) {
   private val logger = KotlinLogging.logger {}
 
   fun getWeeklyItems(): WeeklyItems {
-    val now = LocalDateTime.now()
-    val isFuture: (Event) -> Boolean = { it.dateRange.upperEndpoint()?.isAfter(now) ?: false }
+    val thisSaturday = getThisSaturday(LocalDateTime.now(clock)).plusHours(6)
+    val isFuture: (Event) -> Boolean = { it.dateRange.upperEndpoint()?.isAfter(thisSaturday) ?: false }
     val events = toEvents(eventsService.publicEvents).filter(isFuture)
     val ongoing = toEvents(eventsService.ongoingEvents).filter(isFuture)
     val repeating = toEvents(eventsService.repeatingEvents).filter(isFuture)
@@ -29,10 +31,10 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
     logger.debug { "Found ${ongoing.size} ongoing events" }
     logger.debug { "Found ${repeating.size} repeating events" }
 
-    val nextSunday = now.plusWeeks(1).plusDays(1)
-    val nextMonth = now.plus(1, ChronoUnit.MONTHS).plusDays(1)
+    val nextSunday = thisSaturday.plusWeeks(1).plusDays(1)
+    val nextMonth = thisSaturday.plus(1, ChronoUnit.MONTHS).plusDays(1)
 
-    val thisWeek = Range.closed(now, nextSunday)
+    val thisWeek = Range.closed(thisSaturday, nextSunday)
 
     logger.debug { "Using $thisWeek as \"this week\"" }
 
@@ -60,6 +62,29 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
       futureItems = futureItems.map { toDisplayItem(it) },
       ongoingItems = ongoingItems.map { toDisplayItem(it) }
     )
+  }
+
+  /**
+   * Returns the next saturday after the given date, or the given date if it is a saturday
+   */
+  private fun getThisSaturday(now: LocalDateTime): LocalDateTime {
+    val truncatedDate = now.truncatedTo(ChronoUnit.DAYS)
+    val thisComingSaturday = truncatedDate.plus(getDaysToAdd(truncatedDate).toLong(), ChronoUnit.DAYS)
+    return thisComingSaturday; // break;
+  }
+
+  /**
+   * returns the days until the next Saturday after the given date, or 0 if the given date is Saturday
+   * Sunday +6
+   * Monday +5
+   * Tuesday +4
+   * Wednesday +3
+   * Thursday +2
+   * Friday +1
+   * Saturday +0
+   */
+  fun getDaysToAdd(now: LocalDateTime): Int {
+    return DayOfWeek.SATURDAY.value - (now.dayOfWeek.value % 7)
   }
 
   private fun toDisplayItem(event: Event): DisplayEvent {

@@ -13,6 +13,12 @@ import org.ironworkschurch.events.config.ServiceConfig
 import org.ironworkschurch.events.service.EventsService
 import org.junit.Test
 import java.nio.charset.Charset
+import java.time.*
+import java.time.zone.ZoneRulesProvider.getRules
+import java.time.ZoneOffset
+import java.time.ZoneId
+
+
 
 class TemplateTest {
   @Test
@@ -27,7 +33,12 @@ class TemplateTest {
 
     val serviceConfig = ServiceConfig()
     val objectMapper = serviceConfig.objectMapper
-    val eventsManager = EventsManager(eventsService, objectMapper)
+
+    val localDateTime = LocalDateTime.of(2017, Month.JUNE, 30, 0, 0, 0)
+    val zoneId = ZoneId.systemDefault()
+    val currentOffsetForMyZone = zoneId.rules.getOffset(localDateTime)
+
+    val eventsManager = EventsManager(eventsService, objectMapper, Clock.fixed( localDateTime.toInstant(currentOffsetForMyZone), zoneId) )
     val sermonManager = SermonManager(eventsService, objectMapper, serviceConfig.provideEmailLookup(), serviceConfig.provideIwcUrlRoot())
     //val weeklyItems = eventsManager.getWeeklyItems()
     //val displaySermon = sermonManager.getLastSermon()
