@@ -2,6 +2,7 @@ package org.ironworkschurch.events
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.collect.Range
+import mu.KotlinLogging
 import org.ironworkschurch.events.dto.DisplaySermon
 import org.ironworkschurch.events.dto.WeeklyItems
 import org.ironworkschurch.events.dto.json.Event
@@ -13,6 +14,8 @@ import javax.inject.Inject
 
 open class EventsManager @Inject constructor(val eventsService: EventsService,
                                              private val objectMapper: ObjectMapper) {
+  private val logger = KotlinLogging.logger {}
+
   fun getWeeklyItems(): WeeklyItems {
     val now = LocalDateTime.now()
     val isFuture: (Event) -> Boolean = { it.dateRange.upperEndpoint()?.isAfter(now) ?: false }
@@ -20,20 +23,34 @@ open class EventsManager @Inject constructor(val eventsService: EventsService,
     val ongoing = toEvents(eventsService.ongoingEvents).filter(isFuture)
     val repeating = toEvents(eventsService.repeatingEvents).filter(isFuture)
 
+    logger.debug { "Found ${events.size} public events" }
+    logger.debug { "Found ${ongoing.size} ongoing events" }
+    logger.debug { "Found ${repeating.size} repeating events" }
+
     val nextSunday = now.plusWeeks(1).plusDays(1)
     val nextMonth = now.plus(1, ChronoUnit.MONTHS).plusDays(1)
 
     val thisWeek = Range.closed(now, nextSunday)
 
+    logger.debug { "Using $thisWeek as \"this week\"" }
+
     val thisWeekItems = (repeating + events)
       .filter { it.dateRange.isConnected(thisWeek) }
 
+    logger.debug { "Found ${thisWeekItems.size} items for \"this week\"" }
+
     val ongoingItems: List<Event> = ongoing
+
+    logger.debug { "Found ${ongoingItems.size} items for \"ongoing\"" }
+
+    logger.debug { "Using ${Range.closed(nextSunday, nextMonth)} for \"upcoming\" items " }
 
     val futureItems = events
       .filter { it !in thisWeekItems }
       .filter { it !in ongoingItems }
       .filter { it.dateRange.upperEndpoint()?.isBefore(nextMonth) ?: false}
+
+    logger.debug { "Found ${futureItems.size} items for \"upcoming\"" }
 
     return WeeklyItems (
       thisWeekItems = thisWeekItems,

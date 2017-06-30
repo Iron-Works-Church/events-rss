@@ -1,5 +1,6 @@
 package org.ironworkschurch.events
 
+import mu.KotlinLogging
 import org.ironworkschurch.events.config.DaggerServiceComponent
 import org.ironworkschurch.events.dto.DisplaySermon
 import org.ironworkschurch.events.dto.WeeklyItems
@@ -20,6 +21,8 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
     val weeklyItems = eventsManager.getWeeklyItems()
     val lastSermon = sermonManager.getLastSermon()
 
+    log.debug("retrieved events")
+
     val output = renderOutput(weeklyItems, lastSermon, templateEngine)
     println(output)
   }
@@ -35,16 +38,16 @@ open class Application @Inject constructor(val eventsManager: EventsManager,
     log.debug("processing html template")
     val output = templateEngine.process("view", context)
 
-    log.debug("complete")
+    log.info("complete")
     return output
   }
 
   companion object {
-    val log: Logger = LoggerFactory.getLogger(Application::class.java)
+    private val log = KotlinLogging.logger {}
 
     @JvmStatic
     fun main(args: Array<String>) {
-      log.debug("beginning email generation")
+      log.info("beginning email generation")
 
       log.debug("injecting dependencies")
       val application = DaggerServiceComponent.create().application
